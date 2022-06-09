@@ -9,7 +9,7 @@ type Cache struct {
 	shouldexpire []bool
 }
 
-func NewCache(key []string, value []string, deadline []time.Time) Cache {
+func NewCache(key []string, value []string, deadline []time.Time, shouldexpire []bool) Cache {
 	return Cache{key: key, value: value, deadline: deadline}
 }
 
