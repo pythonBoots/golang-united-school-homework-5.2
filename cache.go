@@ -2,57 +2,63 @@ package cache
 
 import "time"
 
-type Cache struct {
-	key          []string
-	value        []string
-	deadline     []time.Time
-	shouldexpire []bool
+type kvPair struct {
+	key          string
+	value        string
+	deadline     time.Time
+	shouldexpire bool
 }
 
-func NewCache(key []string, value []string, deadline []time.Time, shouldexpire []bool) Cache {
-	return Cache{key: key, value: value, deadline: deadline}
+type Cache struct {
+	kvPAirs []kvPair
+}
+
+func NewCache() Cache {
+	return Cache{}
 }
 
 func (c Cache) Get(key string) (string, bool) {
-	for n := 0; n < len(c.key); n++ {
-		if c.key[n] == key {
-			return c.value[n], true
+	for _, kv := range c.kvPAirs {
+		if kv.key == key {
+			return kv.key, true
 		}
 	}
 	return "", false
 }
 
 func (c *Cache) Put(key, value string) {
-	for n := 0; n < len(c.key); n++ {
-		if c.key[n] == key {
-			c.value[n] = value
+	for _, kv := range c.kvPAirs {
+		if kv.key == key {
+			kv.value = value
 		}
 	}
-	c.key = append(c.key, key)
-	c.value = append(c.value, value)
+	c.kvPAirs = append(c.kvPAirs, kvPair{key: key, value: value})
 
 }
 
 func (c Cache) Keys() []string {
 	slice := []string{}
-	for n := 0; n < len(c.key); n++ {
-		if !c.shouldexpire[n] {
-			slice = append(slice, c.key[n])
+	for _, kv := range c.kvPAirs {
+		if !kv.shouldexpire {
+			slice = append(slice, kv.key)
 		}
 	}
 	return slice
 }
 
-func (c Cache) PutTill(key, value string, deadline time.Time) {
-	for n := 0; n < len(c.key); n++ {
-		if c.key[n] == key {
-			c.value[n] = value
-			c.deadline[n] = deadline
-			c.shouldexpire[n] = true
+func (c *Cache) PutTill(key, value string, deadline time.Time) {
+	for _, kv := range c.kvPAirs {
+		if kv.key == key {
+			kv.value = value
+			kv.deadline = deadline
+			kv.shouldexpire = true
 		}
 	}
-	c.key = append(c.key, key)
-	c.value = append(c.value, value)
-	c.shouldexpire = append(c.shouldexpire, true)
-	c.deadline = append(c.deadline, deadline)
+	c.kvPAirs = append(c.kvPAirs, kvPair{
+		key:          key,
+		value:        value,
+		deadline:     deadline,
+		shouldexpire: true,
+	})
+
 }
