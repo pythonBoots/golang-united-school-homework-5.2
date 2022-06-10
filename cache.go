@@ -11,6 +11,7 @@ type kvP struct {
 
 type Cache struct {
 	kvPs []kvP
+	link *Cache
 }
 
 func NewCache() Cache {
