@@ -2,7 +2,7 @@ package cache
 
 import "time"
 
-type kvPair struct {
+type kvP struct {
 	key          string
 	value        string
 	deadline     time.Time
@@ -10,7 +10,7 @@ type kvPair struct {
 }
 
 type Cache struct {
-	kvPAirs []kvPair
+	kvPs []kvP
 }
 
 func NewCache() Cache {
@@ -18,7 +18,7 @@ func NewCache() Cache {
 }
 
 func (c Cache) Get(key string) (string, bool) {
-	for _, kv := range c.kvPAirs {
+	for _, kv := range c.kvPs {
 		if kv.key == key {
 			return kv.key, true
 		}
@@ -27,18 +27,18 @@ func (c Cache) Get(key string) (string, bool) {
 }
 
 func (c *Cache) Put(key, value string) {
-	for _, kv := range c.kvPAirs {
+	for _, kv := range c.kvPs {
 		if kv.key == key {
 			kv.value = value
 		}
 	}
-	c.kvPAirs = append(c.kvPAirs, kvPair{key: key, value: value})
+	c.kvPs = append(c.kvPs, kvP{key: key, value: value})
 
 }
 
 func (c Cache) Keys() []string {
 	slice := []string{}
-	for _, kv := range c.kvPAirs {
+	for _, kv := range c.kvPs {
 		if !kv.shouldexpire {
 			slice = append(slice, kv.key)
 		}
@@ -47,14 +47,14 @@ func (c Cache) Keys() []string {
 }
 
 func (c *Cache) PutTill(key, value string, deadline time.Time) {
-	for _, kv := range c.kvPAirs {
+	for _, kv := range c.kvPs {
 		if kv.key == key {
 			kv.value = value
 			kv.deadline = deadline
 			kv.shouldexpire = true
 		}
 	}
-	c.kvPAirs = append(c.kvPAirs, kvPair{
+	c.kvPs = append(c.kvPs, kvP{
 		key:          key,
 		value:        value,
 		deadline:     deadline,
