@@ -20,7 +20,7 @@ func NewCache() Cache {
 func (c Cache) Get(key string) (string, bool) {
 	for _, kv := range c.kvPs {
 		if kv.key == key {
-			return kv.key, true
+			return kv.value, true
 		}
 	}
 	return "", false
