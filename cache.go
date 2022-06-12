@@ -11,7 +11,6 @@ type kvP struct {
 
 type Cache struct {
 	kvPs []kvP
-	link *Cache
 }
 
 func NewCache() Cache {
@@ -28,12 +27,14 @@ func (c Cache) Get(key string) (string, bool) {
 }
 
 func (c *Cache) Put(key, value string) {
-	for _, kv := range c.kvPs {
-		if kv.key == key {
-			kv.value = value
+	for i := 0; i < len(c.kvPs); i++ {
+		if c.kvPs[i].key == key {
+			c.kvPs[i].value = value
+			c.kvPs[i].shouldexpire = false
+			return
 		}
 	}
-	c.kvPs = append(c.kvPs, kvP{key: key, value: value})
+	c.kvPs = append(c.kvPs, kvP{key: key, value: value, shouldexpire: false})
 
 }
 
@@ -48,11 +49,12 @@ func (c Cache) Keys() []string {
 }
 
 func (c *Cache) PutTill(key, value string, deadline time.Time) {
-	for _, kv := range c.kvPs {
-		if kv.key == key {
-			kv.value = value
-			kv.deadline = deadline
-			kv.shouldexpire = true
+	for i := 0; i < len(c.kvPs); i++ {
+		if c.kvPs[i].key == key {
+			c.kvPs[i].value = value
+			c.kvPs[i].deadline = deadline
+			c.kvPs[i].shouldexpire = true
+			return
 		}
 	}
 	c.kvPs = append(c.kvPs, kvP{
