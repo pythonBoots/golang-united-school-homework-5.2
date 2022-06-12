@@ -3,10 +3,10 @@ package cache
 import "time"
 
 type kvP struct {
-	key          string
-	value        string
-	deadline     time.Time
-	shouldexpire bool
+	key             string
+	value           string
+	deadline        time.Time
+	canNotBeExpired bool
 }
 
 type Cache struct {
@@ -19,7 +19,7 @@ func NewCache() Cache {
 
 func (c Cache) Get(key string) (string, bool) {
 	for _, kv := range c.kvPs {
-		if kv.key == key && time.Now().After(kv.deadline) && !kv.shouldexpire {
+		if kv.key == key && !time.Now().After(kv.deadline) && kv.canNotBeExpired {
 			return kv.value, true
 		}
 	}
@@ -30,18 +30,18 @@ func (c *Cache) Put(key, value string) {
 	for i := 0; i < len(c.kvPs); i++ {
 		if c.kvPs[i].key == key {
 			c.kvPs[i].value = value
-			c.kvPs[i].shouldexpire = false
+			c.kvPs[i].canNotBeExpired = true
 			return
 		}
 	}
-	c.kvPs = append(c.kvPs, kvP{key: key, value: value, shouldexpire: false})
+	c.kvPs = append(c.kvPs, kvP{key: key, value: value, canNotBeExpired: true})
 
 }
 
 func (c Cache) Keys() []string {
 	slice := []string{}
 	for _, kv := range c.kvPs {
-		if !kv.shouldexpire && time.Now().After(kv.deadline) {
+		if kv.canNotBeExpired && !time.Now().After(kv.deadline) {
 			slice = append(slice, kv.key)
 		}
 	}
@@ -53,13 +53,15 @@ func (c *Cache) PutTill(key, value string, deadline time.Time) {
 		if c.kvPs[i].key == key {
 			c.kvPs[i].value = value
 			c.kvPs[i].deadline = deadline
+			c.kvPs[i].canNotBeExpired = false
 			return
 		}
 	}
 	c.kvPs = append(c.kvPs, kvP{
-		key:      key,
-		value:    value,
-		deadline: deadline,
+		key:             key,
+		value:           value,
+		deadline:        deadline,
+		canNotBeExpired: false,
 	})
 
 }
