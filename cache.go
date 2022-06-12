@@ -53,15 +53,13 @@ func (c *Cache) PutTill(key, value string, deadline time.Time) {
 		if c.kvPs[i].key == key {
 			c.kvPs[i].value = value
 			c.kvPs[i].deadline = deadline
-			c.kvPs[i].shouldexpire = true
 			return
 		}
 	}
 	c.kvPs = append(c.kvPs, kvP{
-		key:          key,
-		value:        value,
-		deadline:     deadline,
-		shouldexpire: true,
+		key:      key,
+		value:    value,
+		deadline: deadline,
 	})
 
 }
