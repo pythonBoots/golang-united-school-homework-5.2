@@ -19,7 +19,7 @@ func NewCache() Cache {
 
 func (c Cache) Get(key string) (string, bool) {
 	for _, kv := range c.kvPs {
-		if kv.key == key {
+		if kv.key == key && time.Now().After(kv.deadline) && !kv.shouldexpire {
 			return kv.value, true
 		}
 	}
@@ -41,7 +41,7 @@ func (c *Cache) Put(key, value string) {
 func (c Cache) Keys() []string {
 	slice := []string{}
 	for _, kv := range c.kvPs {
-		if !kv.shouldexpire {
+		if !kv.shouldexpire && time.Now().After(kv.deadline) {
 			slice = append(slice, kv.key)
 		}
 	}
